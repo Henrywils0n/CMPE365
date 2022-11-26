@@ -1,11 +1,12 @@
 # CMPE365
-Assignment work for CMPE365: Algoirthms \n
+Assignment work for CMPE365: Algoirthms
 
-Ran in virtual environment with glfw and pyOpenGL installed \n
+Ran in virtual environment with glfw and pyOpenGL installed
+
 `pip install glfw`
 `pip install pyOpenGL`
 
-move to assignment directory and run \n
+move to assignment directory and run
 
 `python main.py <args>`
 
