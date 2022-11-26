@@ -10,6 +10,7 @@
 
 
 import math
+import statistics
 import sys
 import os
 
@@ -156,49 +157,88 @@ def turn(a, b, c):
         return COLLINEAR
 
 
-# Build a convex hull from a set of point
-#
-# Use the method described in class
+def buildHull(points: list[Point]):  # Build a convex hull from a set of point
 
-
-def buildHull(points):
     # Handle base cases of two or three points
-    #
-    # [YOUR CODE HERE]
+    if 3 >= len(points) > 1:
+        try:
+            pt3 = points[2]
+        except IndexError:
+            pt3 = points[0]
 
-    # Handle recursive case.
-    #
-    # After you get the hull-merge working, do the following: For each
-    # point that was removed from the convex hull in a merge, set that
-    # point's CCW and CW pointers to None.  You'll see that the arrows
-    # from interior points disappear after you do this.
-    #
-    # [YOUR CODE HERE]
+        turnDir = turn(points[0], points[1], pt3)
+        if turnDir == COLLINEAR:
+            points[0].cwPoint, points[0].ccwPoint = points[1], points[1]
+            points[1].cwPoint, points[1].ccwPoint = points[0], points[0]
 
-    # You can do the following to help in debugging.  This highlights
-    # all the points, then shows them, then pauses until you press
-    # 'p'.  While paused, you can click on a point and its coordinates
-    # will be printed in the console window.  If you are using an IDE
-    # in which you can inspect your variables, this will help you to
-    # identify which point on the screen is which point in your data
-    # structure.
-    #
-    # This is good to do, for example, after you have recursively
-    # built two hulls, to see that the two hulls look right.
-    #
-    # This can also be done immediately after you have merged to hulls
-    # ... again, to see that the merged hull looks right.
-    #
-    # Always after you have inspected things, you should remove the
-    # highlighting from the points that you previously highlighted.
+        elif turnDir == LEFT_TURN:
+            points[0].ccwPoint, points[0].cwPoint = points[1], points[2]
+            points[1].ccwPoint, points[1].cwPoint = points[2], points[0]
+            points[2].ccwPoint, points[2].cwPoint = points[0], points[1]
+
+        else:
+            points[0].ccwPoint, points[0].cwPoint = points[2], points[1]
+            points[1].ccwPoint, points[1].cwPoint = points[0], points[2]
+            points[2].ccwPoint, points[2].cwPoint = points[1], points[0]
+        return
+
+    else:  # Handle recursive case.
+        # calculate median x value and sort lists accordingly
+        medianX = statistics.median(map(lambda pt: pt.x, points))
+        lowList = list(filter(lambda pt: pt.x < medianX, points))
+        highList = list(filter(lambda pt: pt.x >= medianX, points))
+        buildHull(lowList)
+        buildHull(highList)
+        l = lowList[-1]
+        r = highList[0]
+        mid = []
+
+        # walk up
+        while (turn(l.ccwPoint, l, r) == LEFT_TURN) or (turn(l, r, r.cwPoint) == LEFT_TURN):
+            if turn(l.ccwPoint, l, r) == LEFT_TURN:
+                mid.append(l)
+                l = l.ccwPoint
+            elif turn(l, r, r.cwPoint) == LEFT_TURN:
+                mid.append(r)
+                r = r.cwPoint
+
+        lTop = l
+        rTop = r
+
+        # reset l, r for walk down
+        l = lowList[-1]
+        r = highList[0]
+
+        # walk down
+        while (turn(l.cwPoint, l, r) == RIGHT_TURN) or (turn(l, r, r.ccwPoint) == RIGHT_TURN):
+            if turn(l.cwPoint, l, r) == RIGHT_TURN:
+                mid.append(l)
+                l = l.cwPoint
+            elif turn(l, r, r.ccwPoint) == RIGHT_TURN:
+                mid.append(r)
+                r = r.ccwPoint
+
+        lBottom = l
+        rBottom = r
+
+        lTop.cwPoint = rTop
+        rTop.ccwPoint = lTop
+
+        # connect the bottom points together
+        lBottom.ccwPoint = rBottom
+        rBottom.cwPoint = lBottom
+
+        # set pointers to None for middle points
+        hullElements = [lTop, lBottom, rTop, rBottom]
+        for point in mid:
+            if point not in hullElements:
+                point.cwPoint = None
+                point.ccwPoint = None
+
 
     for p in points:
         p.highlight = True
     display(wait=True)
-
-    # At the very end of buildHull(), you should display the result
-    # after every merge, as shown below.  This call to display() does
-    # not pause.
 
     display()
 
@@ -321,9 +361,9 @@ def main():
 
     # Check command-line args
 
-    if len(sys.argv) < 2:
-        print('Usage: %s filename' % sys.argv[0])
-        sys.exit(1)
+    # if len(sys.argv) < 2:
+    #     print('Usage: %s filename' % sys.argv[0])
+    #     sys.exit(1)
 
     args = sys.argv[1:]
     while len(args) > 1:
