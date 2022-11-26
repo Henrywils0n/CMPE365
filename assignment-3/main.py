@@ -1,14 +1,8 @@
 # Dynamic programming for mesh generation
 #
-# Usage: python main.py <file of slices>
-#
 # You'll need Python 3.4+ and must install these packages:
 #
 #   PyOpenGL, GLFW
-#
-# YOU MAY NOT INCLUDE ANY OTHER LIBRARIES, ESPECIALLY NumPy.  DOING SO
-# WILL CAUSE YOU TO LOSE MARKS.
-
 
 haveGlutForFonts = False  # Set to True if you have installed OpenGL GLUT so that text can be
 # drawn on the screen.  It's sometimes very difficult to install GLUT.
@@ -181,14 +175,6 @@ def buildTriangles(slice0: Slice, slice1: Slice):
     #
     # Start at the maximum r,c indices and go backward, depending
     # on whether minDir[r][c] is Dir.PREV_ROW or Dir.PREV_COL.
-    #
-    # For each step backward, construct a triangle from the three
-    # vertices: Two of the vertices are indexed by r (which comes from
-    # slice1) and c (which comes from slice0).  The remaining vertex
-    # depends on which direction (PREV_ROW or PREV_COL) you stepped
-    # backward toward.
-    #
-    # Continue going backward through the array until reaching [0][0].
 
     triangles = []
     r = len(cyclic_slice1)-1
